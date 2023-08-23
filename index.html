@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            background-color: #f4f4f4;
+        }
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 200px;
+            overflow: hidden;
+            margin: auto;
+            border: 1px solid #000;
+        }
+        #dino {
+            position: absolute;
+            bottom: 0;
+            width: 20px;
+            height: 20px;
+            background-color: #000;
+        }
+        .obstacle {
+            position: absolute;
+            bottom: 0;
+            width: 20px;
+            height: 40px;
+            background-color: red;
+        }
+    </style>
+    <title>Google Dino Game</title>
+    <button id="restart-button">Restart</button>
+</head>
+<body>
+    <div id="game-container">
+        <div id="dino"></div>
+    </div>
+
+    <script>
+        var dino = document.getElementById('dino');
+var container = document.getElementById('game-container');
+var jumping = false;
+var obstacleIntervals = [];
+var obstacleCreationInterval = null;
+
+document.addEventListener('keydown', function (e) {
+    if (e.keyCode === 32 && !jumping) {
+        jumping = true;
+        jump();
+    }
+});
+
+function jump() {
+    var position = 0;
+    var upInterval = setInterval(function () {
+        if (position >= 50) {
+            clearInterval(upInterval);
+            var downInterval = setInterval(function () {
+                if (position <= 0) {
+                    clearInterval(downInterval);
+                    jumping = false;
+                } else {
+                    position -= 5;
+                    dino.style.bottom = position + 'px';
+                }
+            }, 20);
+        } else {
+            position += 5;
+            dino.style.bottom = position + 'px';
+        }
+    }, 20);
+}
+
+function createObstacle() {
+    var obstacle = document.createElement('div');
+    obstacle.className = 'obstacle';
+    obstacle.style.right = '0px';
+    container.appendChild(obstacle);
+
+    var obstaclePosition = 0;
+    var obstacleInterval = setInterval(function () {
+        if (obstaclePosition > 800) {
+            clearInterval(obstacleInterval);
+            container.removeChild(obstacle);
+        } else {
+            obstaclePosition += 5;
+            obstacle.style.right = obstaclePosition + 'px';
+        }
+
+        if (obstaclePosition > 780 && obstaclePosition < 800 && parseInt(dino.style.bottom) < 40) {
+            alert('Game Over!');
+            restartGame();
+        }
+    }, 20);
+
+    obstacleIntervals.push(obstacleInterval);
+}
+
+obstacleCreationInterval = setInterval(createObstacle, 2000);
+
+function restartGame() {
+    obstacleIntervals.forEach(clearInterval);
+    clearInterval(obstacleCreationInterval);
+
+    var obstacles = document.getElementsByClassName('obstacle');
+    while (obstacles[0]) {
+        obstacles[0].parentNode.removeChild(obstacles[0]);
+    }
+
+    obstacleIntervals = [];
+    obstacleCreationInterval = setInterval(createObstacle, 2000);
+}
+
+document.getElementById('restart-button').addEventListener('click', restartGame);
+
+    </script>
+</body>
+</html>
